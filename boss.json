@@ -1,0 +1,10 @@
+{
+	"name": "RickWinService",
+	"description": "Framework Delphi para executar o mesmo binário como aplicação VCL/FMX ou Windows Service, com instalação via SCM, controle de estado, validação de privilégios, exceções tipadas e suporte a linha de comando.",
+	"version": "0.1.0",
+	"homepage": "www.ricksolucoes.com.br",
+	"mainsrc": "./src",
+	"browsingpath": "",
+	"projects": [],
+	"dependencies": {}
+}

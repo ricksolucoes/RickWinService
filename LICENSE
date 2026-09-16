@@ -1,0 +1,120 @@
+# RickWinService — Revocable Software License
+
+Copyright © 2026 RickSoluções. All rights reserved.
+
+## 1. Ownership
+
+The software known as **RickWinService**, including, without limitation, its source code, compiled code, documentation, architecture, components, libraries, scripts, configuration files, and any other associated materials, is owned by **RickSoluções**, except where expressly stated otherwise.
+
+The public or private availability of the source code, including through platforms such as GitHub, does not constitute a transfer of intellectual property rights and does not automatically grant any rights beyond those expressly provided under this License.
+
+## 2. Limited Grant of Use
+
+RickSoluções grants the user a limited, non-exclusive, non-transferable, and revocable authorization to use, study, test, and modify the Software, solely while such authorization remains valid.
+
+No ownership rights in the Software are transferred to the user.
+
+## 3. Revocation
+
+The authorization granted under this License may be revoked by RickSoluções, in whole or in part, to the extent permitted by applicable law.
+
+Following notice of revocation, any use, distribution, publication, reproduction, sublicensing, commercialization, or provision of new copies of the Software must cease, unless expressly authorized under a separate agreement with RickSoluções or otherwise required by applicable law.
+
+The user is responsible for complying with the terms of the revocation notice and any applicable transition conditions established by RickSoluções.
+
+## 4. Changes to Licensing Terms
+
+RickSoluções may modify the licensing terms applicable to **new versions, updates, distributions, or new grants of rights** relating to the Software.
+
+The publication of a new license shall not automatically be interpreted as retroactively modifying rights already definitively granted where such modification is not permitted under applicable law.
+
+Use of future versions of the Software may be conditioned upon acceptance of revised or additional licensing terms.
+
+## 5. Distribution and Copies
+
+No individual or legal entity may distribute, redistribute, publish, sell, sublicense, host, provide as a service, or otherwise make copies of the Software available to third parties without the express authorization of RickSoluções.
+
+Where authorization for distribution has been granted and is subsequently terminated or revoked, no new copies may be distributed after the effective termination date established by RickSoluções.
+
+Copies obtained or distributed in violation of the terms of this License shall be considered unauthorized.
+
+## 6. Commercial Use
+
+Commercial use of the Software is not authorized under this License unless expressly approved in writing by RickSoluções.
+
+Commercial use includes, but is not limited to:
+
+* use of the Software to provide paid services;
+* direct or indirect commercialization of the Software;
+* incorporation of the Software into commercial products or services;
+* provision of the Software as SaaS, an API, a platform, or a hosted service;
+* redistribution in exchange for payment or other consideration;
+* economic exploitation of modifications or derivative works.
+
+## 7. Royalties and Commercial Licensing
+
+RickSoluções may establish specific commercial licensing agreements that may include, without limitation:
+
+* royalties;
+* recurring fees;
+* per-installation fees;
+* per-user fees;
+* per-server or per-environment fees;
+* transaction-based fees;
+* enterprise licensing;
+* OEM licensing;
+* SaaS or hosted-service licensing.
+
+No payment obligation shall be created retroactively solely as a result of a unilateral modification to this License where such retroactive obligation is not permitted under applicable law.
+
+Continued commercial use after termination or revocation of an authorization may require the execution of a separate commercial licensing agreement with RickSoluções.
+
+## 8. Modifications and Derivative Works
+
+Authorization to modify the Software does not automatically grant authorization to distribute, sublicense, commercialize, publish, or otherwise make such modifications available to third parties.
+
+Rights concerning contributions, modifications, and derivative works shall be governed by the applicable agreements, contribution terms, and applicable law.
+
+## 9. Trademarks and Identity
+
+This License does not grant any right to use trade names, trademarks, logos, product names, visual identities, or other distinctive signs owned by RickSoluções.
+
+## 10. Disclaimer of Warranty
+
+THE SOFTWARE IS PROVIDED **"AS IS"**, WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED, TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW.
+
+RICKSOLUÇÕES DOES NOT WARRANT THAT THE SOFTWARE WILL BE UNINTERRUPTED, ERROR-FREE, FIT FOR A PARTICULAR PURPOSE, OR COMPATIBLE WITH ANY SPECIFIC SYSTEM, PLATFORM, OR ENVIRONMENT.
+
+## 11. Limitation of Liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, RICKSOLUÇÕES SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, CONSEQUENTIAL, OR OTHER DAMAGES, INCLUDING, WITHOUT LIMITATION, LOSS OF DATA, LOSS OF REVENUE, LOSS OF PROFITS, BUSINESS INTERRUPTION, OR OTHER COMMERCIAL DAMAGES ARISING FROM THE USE OF OR INABILITY TO USE THE SOFTWARE.
+
+## 12. Third-Party Licenses
+
+Any third-party components used by or incorporated into RickWinService remain subject to the respective licenses, terms, and conditions established by their respective rights holders.
+
+This License does not replace, override, or modify any rights or obligations arising from third-party licenses.
+
+## 13. No Affiliation with Third Parties
+
+RickWinService is an independent and unofficial software tool.
+
+Use of the Software to integrate with, interact with, or access third-party products, systems, services, platforms, or technologies does not imply affiliation, partnership, sponsorship, endorsement, authorization, or approval by the respective third-party rights holders.
+
+## 14. Reservation of Rights
+
+All rights not expressly granted under this License are reserved by RickSoluções.
+
+No rights shall be deemed granted by implication, estoppel, or otherwise.
+
+## 15. Additional Licensing
+
+Commercial, enterprise, OEM, SaaS, redistribution, hosting, integration, or other forms of authorization may be granted under a separate written agreement executed with RickSoluções.
+
+Such agreements may contain additional rights, restrictions, fees, royalties, obligations, warranties, support terms, or other commercial conditions.
+
+---
+
+**Copyright © 2026 RickSoluções. All rights reserved.**
+
+**RickWinService is proprietary software made available under a revocable limited-use license.**
