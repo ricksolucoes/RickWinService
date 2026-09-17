@@ -4,6 +4,8 @@ Relevant project changes should be recorded here only when supported by verifiab
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-17
+
 ### Added
 
 - Consolidated automated DUnitX suite with 57 tests across 9 fixtures.

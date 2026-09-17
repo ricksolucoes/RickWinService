@@ -4,6 +4,8 @@ Alterações relevantes do projeto devem ser registradas aqui somente quando sus
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-17
+
 ### Added
 
 - Suíte automatizada DUnitX consolidada com 57 testes distribuídos em 9 fixtures.
