@@ -11,7 +11,7 @@ uses
   Rick.WinService.Tests.CommandLine.Process in 'src\units\Rick.WinService.Tests.CommandLine.Process.pas',
   Rick.WinService.Tests.Security.Process in 'src\units\Rick.WinService.Tests.Security.Process.pas',
   Rick.WinService.Tests.Service.Component in 'src\units\Rick.WinService.Tests.Service.Component.pas',
-  Rick.WinService.Tests.Scm.Process in 'src\integration\Rick.WinService.Tests.Scm.Process.pas';
+  Rick.WinService.Tests.SCM.Process in 'src\integration\src\Rick.WinService.Tests.SCM.Process.pas';
 
 {$R *.res}
 

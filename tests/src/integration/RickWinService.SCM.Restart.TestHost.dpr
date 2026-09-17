@@ -6,6 +6,7 @@ uses
   System.SysUtils,
   Winapi.Windows,
   Winapi.WinSvc,
+  Rick.WinService.Exceptions,
   Rick.WinService.Installer,
   Rick.WinService.Interfaces,
   Rick.WinService.Manager,
@@ -32,16 +33,47 @@ const
   TEST_EXIT_INSTALL_STATE_UNEXPECTED = 900;
   TEST_EXIT_START_STATE_UNEXPECTED = 910;
   TEST_EXIT_INITIAL_PID_UNAVAILABLE = 920;
-
   TEST_EXIT_RESTART_STATE_UNEXPECTED = 930;
   TEST_EXIT_RESTARTED_PID_UNAVAILABLE = 940;
   TEST_EXIT_PID_DID_NOT_CHANGE = 950;
-
   TEST_EXIT_STOP_STATE_UNEXPECTED = 960;
   TEST_EXIT_STILL_INSTALLED = 970;
   TEST_EXIT_FINAL_STATE_UNEXPECTED = 980;
 
-  TEST_EXIT_UNEXPECTED_ERROR = 990;
+  TEST_EXIT_SCM_EXCEPTION = 991;
+  TEST_EXIT_TIMEOUT_EXCEPTION = 992;
+  TEST_EXIT_STATE_EXCEPTION = 993;
+  TEST_EXIT_OPERATION_EXCEPTION = 994;
+  TEST_EXIT_UNEXPECTED_EXCEPTION = 995;
+
+var
+  GStage: string;
+
+function ServiceStateText(
+  const AState: TRickWinServiceState
+): string;
+begin
+  case AState of
+    TRickWinServiceState.NotInstalled:
+      Result := 'NotInstalled';
+    TRickWinServiceState.Stopped:
+      Result := 'Stopped';
+    TRickWinServiceState.StartPending:
+      Result := 'StartPending';
+    TRickWinServiceState.StopPending:
+      Result := 'StopPending';
+    TRickWinServiceState.Running:
+      Result := 'Running';
+    TRickWinServiceState.ContinuePending:
+      Result := 'ContinuePending';
+    TRickWinServiceState.PausePending:
+      Result := 'PausePending';
+    TRickWinServiceState.Paused:
+      Result := 'Paused';
+  else
+    Result := 'Unknown';
+  end;
+end;
 
 function ServiceHostPath: string;
 begin
@@ -67,50 +99,72 @@ begin
     .ExeName(ServiceHostPath);
 end;
 
-function QueryServiceProcessId: Cardinal;
+function OpenServiceQueryHandles(
+  out AScm: SC_HANDLE;
+  out AService: SC_HANDLE
+): Boolean;
+begin
+  AScm := OpenSCManager(nil, nil, SC_MANAGER_CONNECT);
+  if AScm = 0 then
+    Exit(False);
+
+  AService := OpenService(
+    AScm,
+    PChar(TEST_SERVICE_NAME),
+    SERVICE_QUERY_STATUS
+  );
+
+  Result := AService <> 0;
+end;
+
+function ReadServiceProcessId(
+  const AService: SC_HANDLE
+): Cardinal;
 var
-  LScm: SC_HANDLE;
-  LService: SC_HANDLE;
   LStatus: SERVICE_STATUS_PROCESS;
   LBytesNeeded: DWORD;
 begin
   Result := 0;
-  LScm := OpenSCManager(nil, nil, SC_MANAGER_CONNECT);
-  if LScm = 0 then
-    Exit;
+  ZeroMemory(@LStatus, SizeOf(LStatus));
+  LBytesNeeded := 0;
+
+  if QueryServiceStatusEx(
+    AService,
+    SC_STATUS_PROCESS_INFO,
+    PByte(@LStatus),
+    SizeOf(LStatus),
+    LBytesNeeded
+  ) then
+    Result := LStatus.dwProcessId;
+end;
+
+function QueryServiceProcessId: Cardinal;
+var
+  LScm: SC_HANDLE;
+  LService: SC_HANDLE;
+begin
+  LScm := 0;
+  LService := 0;
+
+  if not OpenServiceQueryHandles(LScm, LService) then
+  begin
+    if LScm <> 0 then
+      CloseServiceHandle(LScm);
+
+    Exit(0);
+  end;
 
   try
-    LService := OpenService(
-      LScm,
-      PChar(TEST_SERVICE_NAME),
-      SERVICE_QUERY_STATUS
-    );
-    if LService = 0 then
-      Exit;
-
-    try
-      ZeroMemory(@LStatus, SizeOf(LStatus));
-      LBytesNeeded := 0;
-
-      if QueryServiceStatusEx(
-        LService,
-        SC_STATUS_PROCESS_INFO,
-        PByte(@LStatus),
-        SizeOf(LStatus),
-        LBytesNeeded
-      ) then
-        Result := LStatus.dwProcessId;
-    finally
-      CloseServiceHandle(LService);
-    end;
+    Result := ReadServiceProcessId(LService);
   finally
+    CloseServiceHandle(LService);
     CloseServiceHandle(LScm);
   end;
 end;
 
 function ValidateState(
-  AExpectedState: TRickWinServiceState;
-  AErrorCode: Integer
+  const AExpectedState: TRickWinServiceState;
+  const AErrorCode: Integer
 ): Integer;
 begin
   if TRickWinServiceManager.GetServiceState(TEST_SERVICE_NAME) <>
@@ -124,14 +178,14 @@ procedure BestEffortStop;
 var
   LService: IRickWinService;
 begin
-  if not TRickWinServiceManager.IsServiceRunning(TEST_SERVICE_NAME) then
-    Exit;
-
-  LService := CreateServiceModel;
   try
+    if not TRickWinServiceManager.IsServiceRunning(TEST_SERVICE_NAME) then
+      Exit;
+
+    LService := CreateServiceModel;
     LService.Stop;
   except
-    // Cleanup defensivo.
+    // Cleanup defensivo: nunca substitui o resultado original do teste.
   end;
 end;
 
@@ -139,18 +193,18 @@ procedure BestEffortUninstall;
 var
   LInstaller: TRickWinServiceInstaller;
 begin
-  if not TRickWinServiceManager.IsServiceInstalled(TEST_SERVICE_NAME) then
-    Exit;
-
-  LInstaller := CreateInstaller;
   try
+    if not TRickWinServiceManager.IsServiceInstalled(TEST_SERVICE_NAME) then
+      Exit;
+
+    LInstaller := CreateInstaller;
     try
       LInstaller.Uninstall;
-    except
-      // Cleanup defensivo.
+    finally
+      LInstaller.Free;
     end;
-  finally
-    LInstaller.Free;
+  except
+    // Cleanup defensivo: nunca substitui o resultado original do teste.
   end;
 end;
 
@@ -160,13 +214,29 @@ begin
   BestEffortUninstall;
 end;
 
+function ValidatePrerequisites: Integer;
+begin
+  if not TRickWinServiceSecurity.IsRunningAsAdministrator then
+    Exit(TEST_EXIT_ADMIN_REQUIRED);
+
+  if not FileExists(ServiceHostPath) then
+    Exit(TEST_EXIT_SERVICE_HOST_NOT_FOUND);
+
+  if TRickWinServiceManager.IsServiceInstalled(TEST_SERVICE_NAME) then
+    Exit(TEST_EXIT_SERVICE_ALREADY_EXISTS);
+
+  Result := TEST_EXIT_SUCCESS;
+end;
+
 function InstallAndStart(
   const AInstaller: TRickWinServiceInstaller;
   const AService: IRickWinService
 ): Integer;
 begin
+  GStage := 'Install';
   AInstaller.Install;
 
+  GStage := 'Validate Stopped after Install';
   Result := ValidateState(
     TRickWinServiceState.Stopped,
     TEST_EXIT_INSTALL_STATE_UNEXPECTED
@@ -174,8 +244,10 @@ begin
   if Result <> TEST_EXIT_SUCCESS then
     Exit;
 
+  GStage := 'Start';
   AService.Start;
 
+  GStage := 'Validate Running after Start';
   Result := ValidateState(
     TRickWinServiceState.Running,
     TEST_EXIT_START_STATE_UNEXPECTED
@@ -183,14 +255,21 @@ begin
 end;
 
 function RestartAndValidate(
-  const AService: IRickWinService;
-  AInitialPid: Cardinal
+  const AService: IRickWinService
 ): Integer;
 var
+  LInitialPid: Cardinal;
   LRestartedPid: Cardinal;
 begin
+  GStage := 'Read initial PID';
+  LInitialPid := QueryServiceProcessId;
+  if LInitialPid = 0 then
+    Exit(TEST_EXIT_INITIAL_PID_UNAVAILABLE);
+
+  GStage := 'Restart';
   AService.Restart;
 
+  GStage := 'Validate Running after Restart';
   Result := ValidateState(
     TRickWinServiceState.Running,
     TEST_EXIT_RESTART_STATE_UNEXPECTED
@@ -198,11 +277,12 @@ begin
   if Result <> TEST_EXIT_SUCCESS then
     Exit;
 
+  GStage := 'Read restarted PID';
   LRestartedPid := QueryServiceProcessId;
   if LRestartedPid = 0 then
     Exit(TEST_EXIT_RESTARTED_PID_UNAVAILABLE);
 
-  if LRestartedPid = AInitialPid then
+  if LRestartedPid = LInitialPid then
     Exit(TEST_EXIT_PID_DID_NOT_CHANGE);
 
   Result := TEST_EXIT_SUCCESS;
@@ -213,8 +293,10 @@ function StopAndUninstall(
   const AService: IRickWinService
 ): Integer;
 begin
+  GStage := 'Stop';
   AService.Stop;
 
+  GStage := 'Validate Stopped after Stop';
   Result := ValidateState(
     TRickWinServiceState.Stopped,
     TEST_EXIT_STOP_STATE_UNEXPECTED
@@ -222,8 +304,10 @@ begin
   if Result <> TEST_EXIT_SUCCESS then
     Exit;
 
+  GStage := 'Uninstall';
   AInstaller.Uninstall;
 
+  GStage := 'Validate absence after Uninstall';
   if TRickWinServiceManager.IsServiceInstalled(TEST_SERVICE_NAME) then
     Exit(TEST_EXIT_STILL_INSTALLED);
 
@@ -237,16 +321,11 @@ function ExecuteRestartRoundTrip: Integer;
 var
   LInstaller: TRickWinServiceInstaller;
   LService: IRickWinService;
-  LInitialPid: Cardinal;
 begin
-  if not TRickWinServiceSecurity.IsRunningAsAdministrator then
-    Exit(TEST_EXIT_ADMIN_REQUIRED);
-
-  if not FileExists(ServiceHostPath) then
-    Exit(TEST_EXIT_SERVICE_HOST_NOT_FOUND);
-
-  if TRickWinServiceManager.IsServiceInstalled(TEST_SERVICE_NAME) then
-    Exit(TEST_EXIT_SERVICE_ALREADY_EXISTS);
+  GStage := 'Validate prerequisites';
+  Result := ValidatePrerequisites;
+  if Result <> TEST_EXIT_SUCCESS then
+    Exit;
 
   LInstaller := CreateInstaller;
   try
@@ -256,11 +335,7 @@ begin
     if Result <> TEST_EXIT_SUCCESS then
       Exit;
 
-    LInitialPid := QueryServiceProcessId;
-    if LInitialPid = 0 then
-      Exit(TEST_EXIT_INITIAL_PID_UNAVAILABLE);
-
-    Result := RestartAndValidate(LService, LInitialPid);
+    Result := RestartAndValidate(LService);
     if Result <> TEST_EXIT_SUCCESS then
       Exit;
 
@@ -270,22 +345,105 @@ begin
   end;
 end;
 
+procedure ReportScmException(
+  const E: ERickWinServiceScmException
+);
+begin
+  WriteLn('Stage: ', GStage);
+  WriteLn('Exception: ', E.ClassName);
+  WriteLn('Message: ', E.Message);
+  WriteLn('Win32ErrorCode: ', E.Win32ErrorCode);
+  WriteLn('Context: ', E.Context);
+  WriteLn('ServiceName: ', E.ServiceName);
+end;
+
+procedure ReportTimeoutException(
+  const E: ERickWinServiceTimeoutException
+);
+begin
+  WriteLn('Stage: ', GStage);
+  WriteLn('Exception: ', E.ClassName);
+  WriteLn('Message: ', E.Message);
+  WriteLn('ExpectedState: ', ServiceStateText(E.ExpectedState));
+  WriteLn('CurrentState: ', ServiceStateText(E.CurrentState));
+  WriteLn('ServiceWin32ExitCode: ', E.ServiceWin32ExitCode);
+  WriteLn('ServiceSpecificExitCode: ', E.ServiceSpecificExitCode);
+  WriteLn('Timeout: ', E.Timeout);
+end;
+
+procedure ReportStateException(
+  const E: ERickWinServiceStateException
+);
+begin
+  WriteLn('Stage: ', GStage);
+  WriteLn('Exception: ', E.ClassName);
+  WriteLn('Message: ', E.Message);
+  WriteLn('ExpectedState: ', ServiceStateText(E.ExpectedState));
+  WriteLn('CurrentState: ', ServiceStateText(E.CurrentState));
+  WriteLn('ServiceWin32ExitCode: ', E.ServiceWin32ExitCode);
+  WriteLn('ServiceSpecificExitCode: ', E.ServiceSpecificExitCode);
+end;
+
+procedure ReportOperationException(
+  const E: ERickWinServiceOperationException
+);
+begin
+  WriteLn('Stage: ', GStage);
+  WriteLn('Exception: ', E.ClassName);
+  WriteLn('Message: ', E.Message);
+  WriteLn('ServiceName: ', E.ServiceName);
+end;
+
+procedure ReportUnexpectedException(
+  const E: Exception
+);
+begin
+  WriteLn('Stage: ', GStage);
+  WriteLn('Exception: ', E.ClassName);
+  WriteLn('Message: ', E.Message);
+end;
+
 function Execute: Integer;
 begin
-  Result := TEST_EXIT_UNEXPECTED_ERROR;
   try
     Result := ExecuteRestartRoundTrip;
-  finally
-    if Result <> TEST_EXIT_SUCCESS then
-      BestEffortCleanup;
+  except
+    on E: ERickWinServiceTimeoutException do
+    begin
+      ReportTimeoutException(E);
+      Result := TEST_EXIT_TIMEOUT_EXCEPTION;
+    end;
+
+    on E: ERickWinServiceScmException do
+    begin
+      ReportScmException(E);
+      Result := TEST_EXIT_SCM_EXCEPTION;
+    end;
+
+    on E: ERickWinServiceStateException do
+    begin
+      ReportStateException(E);
+      Result := TEST_EXIT_STATE_EXCEPTION;
+    end;
+
+    on E: ERickWinServiceOperationException do
+    begin
+      ReportOperationException(E);
+      Result := TEST_EXIT_OPERATION_EXCEPTION;
+    end;
+
+    on E: Exception do
+    begin
+      ReportUnexpectedException(E);
+      Result := TEST_EXIT_UNEXPECTED_EXCEPTION;
+    end;
   end;
+
+  if Result <> TEST_EXIT_SUCCESS then
+    BestEffortCleanup;
 end;
 
 begin
-  try
-    Halt(Execute);
-  except
-    BestEffortCleanup;
-    Halt(TEST_EXIT_UNEXPECTED_ERROR);
-  end;
+  Halt(Execute);
 end.
+

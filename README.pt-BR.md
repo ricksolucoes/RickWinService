@@ -464,6 +464,29 @@ A descrição completa das **11 units `.pas`**, do arquivo **DFM** e das depend�
 
 
 
+## 🧪 Testes e qualidade
+
+O projeto possui uma suíte automatizada DUnitX com **57 testes distribuídos em 9 fixtures**, cobrindo testes unitários, execução em processos separados, componente de serviço e integração real com o Windows Service Control Manager (SCM).
+
+A integração exercita cenários reais de:
+
+```text
+Query
+Install / Uninstall
+Start / Stop
+Restart
+```
+
+No cenário de Restart, a suíte também verifica a substituição do processo do serviço por meio da mudança do PID, além do retorno ao estado `Running`.
+
+Na baseline validada em **17/09/2026**, o grupo de testes concluiu `Build All Projects` com sucesso e o runner reportou **57 testes aprovados, 0 ignorados, 0 falhos, 0 erros e 0 testes com leak reportado pelo DUnitX**.
+
+A suíte completa deve ser executada como Administrador porque os cenários SCM mutáveis instalam, iniciam, param, reiniciam e removem serviços temporários.
+
+📚 Estratégia, estrutura, Test Hosts, execução e Method Toxicity Metrics: [`docs/TESTING.pt-BR.md`](docs/TESTING.pt-BR.md)
+
+
+
 ## 📚 Documentação
 
 | Documento | Descrição |
@@ -471,6 +494,7 @@ A descrição completa das **11 units `.pas`**, do arquivo **DFM** e das depend�
 | 📘 [`docs/API.pt-BR.md`](docs/API.pt-BR.md) | Fachada, contratos, tipos, callbacks e exceções |
 | 💻 [`docs/CLI.pt-BR.md`](docs/CLI.pt-BR.md) | Switches, precedência e códigos de saída |
 | 🏗️ [`docs/ARCHITECTURE.pt-BR.md`](docs/ARCHITECTURE.pt-BR.md) | Responsabilidades, dependências e fluxos internos |
+| 🧪 [`docs/TESTING.pt-BR.md`](docs/TESTING.pt-BR.md) | Estratégia de testes, Test Hosts, integração SCM e métricas |
 | 🔄 [`docs/MIGRATION.pt-BR.md`](docs/MIGRATION.pt-BR.md) | Histórico comprovável e auditoria da documentação anterior |
 | 📝 [`CHANGELOG.pt-BR.md`](CHANGELOG.pt-BR.md) | Alterações ainda não associadas a uma release comprovada |
 
@@ -488,16 +512,18 @@ A descrição completa das **11 units `.pas`**, do arquivo **DFM** e das depend�
 │   ├── ARCHITECTURE.md
 │   ├── CLI.md
 │   ├── MIGRATION.md
+│   ├── TESTING.md
 │   ├── API.pt-BR.md
 │   ├── ARCHITECTURE.pt-BR.md
 │   ├── CLI.pt-BR.md
-│   └── MIGRATION.pt-BR.md
+│   ├── MIGRATION.pt-BR.md
+│   └── TESTING.pt-BR.md
 │
 ├── CHANGELOG.md
 ├── LICENSE
 ├── README.md
 ├── CHANGELOG.pt-BR.md
-├── LICENSE.pt-BR
+├── LICENSE-pt-BR
 └── README.pt-BR.md
 ```
 

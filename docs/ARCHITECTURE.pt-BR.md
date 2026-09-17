@@ -284,3 +284,62 @@ flowchart LR
 As units de segurança, exceções, Manager, Installer e CommandLine não dependem de formulários para apresentar erros. As falhas são devolvidas por exceção ou ExitCode, conforme o caminho.
 
 O modo Desktop depende condicionalmente de `FMX.Forms` ou `Vcl.Forms`; o modo Windows Service depende de `Vcl.SvcMgr`.
+
+## Arquitetura de testes
+
+A suíte de testes é mantida separadamente do código de produção e utiliza um runner DUnitX central, fixtures organizadas por responsabilidade e Test Hosts para comportamentos que precisam ocorrer em processos independentes ou contra o SCM real.
+
+```text
+RickWinService.Tests
+│
+├── units/
+│   ├── testes unitários
+│   ├── testes por processo
+│   └── teste do componente de serviço
+│
+├── component/
+│   ├── CommandLine.TestHost
+│   └── Security.TestHost
+│
+└── integration/
+    ├── Scm.Process
+    ├── Query.TestHost
+    ├── InstallRoundTrip.TestHost
+    ├── Lifecycle.TestHost
+    ├── Restart.TestHost
+    └── Integration.ServiceHost
+```
+
+O fluxo geral é:
+
+```mermaid
+flowchart TD
+    Runner[Runner DUnitX] --> Units[Fixtures em tests/src/units]
+    Runner --> SCMFixture[Scm.Process]
+
+    Units --> CommandProcess[CommandLine.Process]
+    CommandProcess --> CommandHost[CommandLine.TestHost]
+
+    Units --> SecurityProcess[Security.Process]
+    SecurityProcess --> SecurityHost[Security.TestHost]
+
+    Units --> ServiceComponent[Service.Component]
+
+    SCMFixture --> QueryHost[SCM.Query.TestHost]
+    SCMFixture --> InstallHost[SCM.InstallRoundTrip.TestHost]
+    SCMFixture --> LifecycleHost[SCM.Lifecycle.TestHost]
+    SCMFixture --> RestartHost[SCM.Restart.TestHost]
+
+    LifecycleHost --> ServiceHost[Integration.ServiceHost]
+    RestartHost --> ServiceHost
+```
+
+Responsabilidades:
+
+- `tests/src/units`: fixtures registradas no runner DUnitX;
+- `tests/src/component`: processos auxiliares para validar CommandLine e Security fora do processo do runner;
+- `tests/src/integration`: orquestração e Test Hosts que exercitam o Windows SCM real;
+- `RickWinService.Integration.ServiceHost`: executável mínimo utilizado como serviço temporário nos cenários Lifecycle e Restart.
+
+A suíte final possui 57 testes em 9 fixtures. Os detalhes de build, execução, cenários SCM, cleanup, baseline validada e Method Toxicity Metrics estão em [`TESTING.pt-BR.md`](TESTING.pt-BR.md).
+

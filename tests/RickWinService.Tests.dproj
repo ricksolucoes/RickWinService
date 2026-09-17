@@ -96,7 +96,7 @@
         <DCCReference Include="src\units\Rick.WinService.Tests.CommandLine.Process.pas"/>
         <DCCReference Include="src\units\Rick.WinService.Tests.Security.Process.pas"/>
         <DCCReference Include="src\units\Rick.WinService.Tests.Service.Component.pas"/>
-        <DCCReference Include="src\integration\Rick.WinService.Tests.Scm.Process.pas"/>
+        <DCCReference Include="src\integration\src\Rick.WinService.Tests.SCM.Process.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

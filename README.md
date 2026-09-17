@@ -463,6 +463,29 @@ The complete description of the **11 `.pas` units**, the **DFM** file, and the i
 
 
 
+## 🧪 Testing and quality
+
+The project includes an automated DUnitX suite with **57 tests across 9 fixtures**, covering unit tests, separate-process execution, the service component, and real integration with the Windows Service Control Manager (SCM).
+
+The integration suite exercises real scenarios for:
+
+```text
+Query
+Install / Uninstall
+Start / Stop
+Restart
+```
+
+For Restart, the suite also verifies service-process replacement through a PID change, in addition to returning to the `Running` state.
+
+In the baseline validated on **2026-09-17**, the test group completed `Build All Projects` successfully and the runner reported **57 passed tests, 0 ignored, 0 failed, 0 errors, and 0 tests reported as leaked by DUnitX**.
+
+The complete suite should be executed as Administrator because mutable SCM scenarios install, start, stop, restart, and remove temporary services.
+
+📚 Strategy, structure, Test Hosts, execution, and Method Toxicity Metrics: [`docs/TESTING.md`](docs/TESTING.md)
+
+
+
 ## 📚 Documentation
 
 | Document | Description |
@@ -470,6 +493,7 @@ The complete description of the **11 `.pas` units**, the **DFM** file, and the i
 | 📘 [`docs/API.md`](docs/API.md) | Facade, contracts, types, callbacks, and exceptions |
 | 💻 [`docs/CLI.md`](docs/CLI.md) | Switches, precedence, and exit codes |
 | 🏗️ [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Responsibilities, dependencies, and internal flows |
+| 🧪 [`docs/TESTING.md`](docs/TESTING.md) | Test strategy, Test Hosts, SCM integration, and metrics |
 | 🔄 [`docs/MIGRATION.md`](docs/MIGRATION.md) | Verifiable history and audit of the previous documentation |
 | 📝 [`CHANGELOG.md`](CHANGELOG.md) | Changes not yet associated with a verified release |
 
@@ -487,10 +511,12 @@ The complete description of the **11 `.pas` units**, the **DFM** file, and the i
 │   ├── ARCHITECTURE.md
 │   ├── CLI.md
 │   ├── MIGRATION.md
+│   ├── TESTING.md
 │   ├── API.pt-BR.md
 │   ├── ARCHITECTURE.pt-BR.md
 │   ├── CLI.pt-BR.md
-│   └── MIGRATION.pt-BR.md
+│   ├── MIGRATION.pt-BR.md
+│   └── TESTING.pt-BR.md
 │
 ├── CHANGELOG.md
 ├── LICENSE

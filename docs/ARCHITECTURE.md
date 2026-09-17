@@ -284,3 +284,62 @@ flowchart LR
 The security, exceptions, Manager, Installer, and CommandLine units do not depend on forms to display errors. Failures are returned through exceptions or ExitCode, depending on the path.
 
 Desktop mode conditionally depends on `FMX.Forms` or `Vcl.Forms`; Windows Service mode depends on `Vcl.SvcMgr`.
+
+## Test architecture
+
+The test suite is kept separate from production code and uses a central DUnitX runner, responsibility-oriented fixtures, and Test Hosts for behavior that must occur in independent processes or against the real SCM.
+
+```text
+RickWinService.Tests
+│
+├── units/
+│   ├── unit tests
+│   ├── process tests
+│   └── service component test
+│
+├── component/
+│   ├── CommandLine.TestHost
+│   └── Security.TestHost
+│
+└── integration/
+    ├── Scm.Process
+    ├── Query.TestHost
+    ├── InstallRoundTrip.TestHost
+    ├── Lifecycle.TestHost
+    ├── Restart.TestHost
+    └── Integration.ServiceHost
+```
+
+The general flow is:
+
+```mermaid
+flowchart TD
+    Runner[DUnitX runner] --> Units[Fixtures under tests/src/units]
+    Runner --> SCMFixture[Scm.Process]
+
+    Units --> CommandProcess[CommandLine.Process]
+    CommandProcess --> CommandHost[CommandLine.TestHost]
+
+    Units --> SecurityProcess[Security.Process]
+    SecurityProcess --> SecurityHost[Security.TestHost]
+
+    Units --> ServiceComponent[Service.Component]
+
+    SCMFixture --> QueryHost[SCM.Query.TestHost]
+    SCMFixture --> InstallHost[SCM.InstallRoundTrip.TestHost]
+    SCMFixture --> LifecycleHost[SCM.Lifecycle.TestHost]
+    SCMFixture --> RestartHost[SCM.Restart.TestHost]
+
+    LifecycleHost --> ServiceHost[Integration.ServiceHost]
+    RestartHost --> ServiceHost
+```
+
+Responsibilities:
+
+- `tests/src/units`: fixtures registered by the DUnitX runner;
+- `tests/src/component`: helper processes used to validate CommandLine and Security outside the runner process;
+- `tests/src/integration`: orchestration and Test Hosts that exercise the real Windows SCM;
+- `RickWinService.Integration.ServiceHost`: minimal executable used as the temporary service in Lifecycle and Restart scenarios.
+
+The final suite contains 57 tests across 9 fixtures. Build, execution, SCM scenarios, cleanup, validated baseline, and Method Toxicity Metrics are documented in [`TESTING.md`](TESTING.md).
+

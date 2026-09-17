@@ -27,9 +27,6 @@
         <Projects Include="src\integration\RickWinService.SCM.Restart.TestHost.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="src\integration\RickWinService.SCM.Restart.Diagnostic.TestHost.dproj">
-            <Dependencies/>
-        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -110,23 +107,14 @@
     <Target Name="RickWinService_SCM_Restart_TestHost:Make">
         <MSBuild Projects="src\integration\RickWinService.SCM.Restart.TestHost.dproj" Targets="Make"/>
     </Target>
-    <Target Name="RickWinService_SCM_Restart_Diagnostic_TestHost">
-        <MSBuild Projects="src\integration\RickWinService.SCM.Restart.Diagnostic.TestHost.dproj"/>
-    </Target>
-    <Target Name="RickWinService_SCM_Restart_Diagnostic_TestHost:Clean">
-        <MSBuild Projects="src\integration\RickWinService.SCM.Restart.Diagnostic.TestHost.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="RickWinService_SCM_Restart_Diagnostic_TestHost:Make">
-        <MSBuild Projects="src\integration\RickWinService.SCM.Restart.Diagnostic.TestHost.dproj" Targets="Make"/>
-    </Target>
     <Target Name="Build">
-        <CallTarget Targets="RickWinService_Tests;RickWinService_CommandLine_TestHost;RickWinService_Security_TestHost;RickWinService_SCM_Query_TestHost;RickWinService_SCM_InstallRoundTrip_TestHost;RickWinService_Integration_ServiceHost;RickWinService_SCM_Lifecycle_TestHost;RickWinService_SCM_Restart_TestHost;RickWinService_SCM_Restart_Diagnostic_TestHost"/>
+        <CallTarget Targets="RickWinService_Tests;RickWinService_CommandLine_TestHost;RickWinService_Security_TestHost;RickWinService_SCM_Query_TestHost;RickWinService_SCM_InstallRoundTrip_TestHost;RickWinService_Integration_ServiceHost;RickWinService_SCM_Lifecycle_TestHost;RickWinService_SCM_Restart_TestHost"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="RickWinService_Tests:Clean;RickWinService_CommandLine_TestHost:Clean;RickWinService_Security_TestHost:Clean;RickWinService_SCM_Query_TestHost:Clean;RickWinService_SCM_InstallRoundTrip_TestHost:Clean;RickWinService_Integration_ServiceHost:Clean;RickWinService_SCM_Lifecycle_TestHost:Clean;RickWinService_SCM_Restart_TestHost:Clean;RickWinService_SCM_Restart_Diagnostic_TestHost:Clean"/>
+        <CallTarget Targets="RickWinService_Tests:Clean;RickWinService_CommandLine_TestHost:Clean;RickWinService_Security_TestHost:Clean;RickWinService_SCM_Query_TestHost:Clean;RickWinService_SCM_InstallRoundTrip_TestHost:Clean;RickWinService_Integration_ServiceHost:Clean;RickWinService_SCM_Lifecycle_TestHost:Clean;RickWinService_SCM_Restart_TestHost:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="RickWinService_Tests:Make;RickWinService_CommandLine_TestHost:Make;RickWinService_Security_TestHost:Make;RickWinService_SCM_Query_TestHost:Make;RickWinService_SCM_InstallRoundTrip_TestHost:Make;RickWinService_Integration_ServiceHost:Make;RickWinService_SCM_Lifecycle_TestHost:Make;RickWinService_SCM_Restart_TestHost:Make;RickWinService_SCM_Restart_Diagnostic_TestHost:Make"/>
+        <CallTarget Targets="RickWinService_Tests:Make;RickWinService_CommandLine_TestHost:Make;RickWinService_Security_TestHost:Make;RickWinService_SCM_Query_TestHost:Make;RickWinService_SCM_InstallRoundTrip_TestHost:Make;RickWinService_Integration_ServiceHost:Make;RickWinService_SCM_Lifecycle_TestHost:Make;RickWinService_SCM_Restart_TestHost:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
